@@ -1,0 +1,52 @@
+/* Обнуление */
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #f4f7f6;
+}
+
+/* Шапка (на всю ширину) */
+.site-header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background-color: #fff;
+    border-bottom: 1px solid #ddd;
+}
+.logo { font-size: 24px; font-weight: bold; color: #4a6a4a; }
+.nav-links { display: flex; list-style: none; gap: 20px; }
+.nav-link { text-decoration: none; color: #4a6a4a; font-weight: 600; }
+
+/* Контейнер для центрирования контента */
+.content-container {
+    max-width: 900px;
+    margin: 50px auto; /* 50px отступ сверху, auto центрирует */
+    padding: 0 20px;
+}
+
+/* Карточка страницы */
+.main-container {
+    width: 100%;           /* Занимает всю доступную ширину */
+    max-width: 900px;      /* НО не шире 900px */
+    margin: 50px auto;     /* 50px отступ сверху/снизу, auto — центрирует по горизонтали */
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-side { flex: 1; padding: 40px; }
+.image-side { flex: 1; background-size: cover; background-position: center; }
+
+/* Формы */
+h1 { color: #333; margin-bottom: 20px; }
+.form-group { margin-bottom: 20px; }
+.form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; }
+.btn { width: 100%; padding: 14px; border: none; border-radius: 4px; color: white; cursor: pointer; }
+.btn-primary { background-color: #4a6a4a; }

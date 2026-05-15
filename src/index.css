@@ -1,0 +1,334 @@
+/* Общие стили */
+/* Добавь это в начало твоего файла стилей */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+} 
+
+* {
+
+    box-sizing: border-box;
+
+    margin: 0;
+
+    padding: 0;
+
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Похожий шрифт */
+
+}
+
+
+
+body {
+
+    background-color: #f0f2f5;
+
+    background-image: url('../images/wooden_table.jpg'); /* На замену стола, если есть картинка */
+
+    background-size: cover;
+
+    justify-content: center;
+
+    align-items: center;
+
+    min-height: 100vh;
+
+    padding: 20px;
+
+}
+
+
+
+/* Шапка сайта */
+
+.site-header {
+
+    background-color: #fff;
+
+    padding: 10px 20px;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    border-bottom: 1px solid #ddd;
+
+    border-radius: 8px 8px 0 0;
+
+    width: 100%;
+
+}
+
+
+
+.logo {
+
+    font-size: 24px;
+
+    font-weight: bold;
+
+    color: #4a6a4a; /* Темно-зеленый */
+
+}
+
+
+
+.search-bar {
+
+    padding: 8px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 4px;
+
+    width: 200px;
+
+}
+
+
+
+/* Основной контейнер формы */
+
+.main-container {
+
+    background-color: rgba(255, 255, 255, 0.95);
+
+    border-radius: 8px;
+
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+
+    width: 100%;
+
+    max-width: 800px; /* Для десктопа */
+
+    overflow: hidden;
+
+    display: flex;
+
+    flex-direction: column;
+
+}
+
+
+
+/* Контент с фоном */
+
+.content-wrapper {
+
+    display: flex;
+
+    flex: 1;
+
+}
+
+
+
+.form-side {
+
+    flex: 1;
+
+    padding: 40px;
+
+}
+
+
+
+.image-side {
+
+    flex: 1;
+
+    background-size: cover;
+
+    background-position: center;
+
+}
+
+
+
+/* Стили заголовков и текста */
+
+h1 {
+
+    font-size: 28px;
+
+    margin-bottom: 30px;
+
+    color: #333;
+
+    font-weight: 600;
+
+}
+
+
+
+.form-group {
+
+    margin-bottom: 15px;
+
+}
+
+
+
+label {
+
+    display: block;
+
+    margin-bottom: 5px;
+
+    font-weight: bold;
+
+    color: #555;
+
+    font-size: 14px;
+
+}
+
+
+
+input[type="text"],
+
+input[type="email"],
+
+input[type="password"] {
+
+    width: 100%;
+
+    padding: 12px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 4px;
+
+}
+
+
+
+.checkbox-group {
+
+    display: flex;
+
+    align-items: center;
+
+    margin-bottom: 20px;
+
+    font-size: 12px;
+
+    color: #666;
+
+}
+
+
+
+.checkbox-group input {
+
+    margin-right: 10px;
+
+}
+
+
+
+/* Стили кнопок */
+
+.btn {
+
+    width: 100%;
+
+    padding: 12px;
+
+    border: none;
+
+    border-radius: 4px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    text-transform: uppercase;
+
+}
+
+
+
+.btn-primary {
+
+    background-color: #88a988; /* Тусклый зеленый с макета */
+
+    color: white;
+
+}
+
+
+
+.btn-secondary {
+
+    background-color: #e59e66; /* Оранжевый с макета */
+
+    color: white;
+
+}
+
+
+
+/* Нижние ссылки */
+
+.form-footer {
+
+    text-align: center;
+
+    margin-top: 20px;
+
+    font-size: 14px;
+
+}
+
+
+
+.form-footer a {
+
+    color: #4a6a4a;
+
+    text-decoration: none;
+
+    font-weight: bold;
+
+}
+
+
+
+.social-login {
+
+    display: flex;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    margin-top: 20px;
+
+}
+
+
+
+.btn-social {
+
+    background-color: white;
+
+    border: 1px solid #ccc;
+
+    padding: 10px;
+
+    border-radius: 4px;
+
+    display: flex;
+
+    align-items: center;
+
+    text-transform: none;
+
+    color: #333;
+
+}
