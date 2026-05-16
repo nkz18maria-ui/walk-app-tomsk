@@ -1,20 +1,29 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 const LoginPage = () => {
-    const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError('');
         
-        // Имитируем успешный вход
-        localStorage.setItem('isAuth', 'true');
-        
-        // Перенаправляем на главную. 
-        // window.location.href используется, чтобы Header "увидел" изменения в localStorage
-        window.location.href = '/'; 
+        try {
+            // Отправляем запрос авторизации на Spring Boot
+            await axios.post('http://localhost:8080/api/auth/login', {
+                email,
+                password
+            });
+            
+            localStorage.setItem('isAuth', 'true');
+            window.location.href = '/'; // Перезагружаем страницу на главной, чтобы Header обновился
+        } catch (err: any) {
+            console.error("Ошибка входа:", err);
+            setError(err.response?.data?.message || 'Неверный email или пароль');
+        }
     };
 
     return (
@@ -22,6 +31,7 @@ const LoginPage = () => {
             <div className="content-wrapper">
                 <div className="form-side">
                     <h1>ВХОД</h1>
+                    {error && <div style={{ color: '#8b2e2e', marginBottom: '15px', fontWeight: '600' }}>{error}</div>}
                     <form onSubmit={handleLogin}>
                         <div className="form-group">
                             <label>Email</label>
@@ -39,7 +49,7 @@ const LoginPage = () => {
                                 type="password" 
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                placeholder="******" 
+                                placeholder="не менее 8 символов" 
                                 required 
                             />
                         </div>

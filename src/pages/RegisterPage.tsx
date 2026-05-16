@@ -1,19 +1,37 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 const RegisterPage = () => {
-    const navigate = useNavigate();
-    const [name, setName] = useState('');
+    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
 
-    const handleRegister = (e: React.FormEvent) => {
+    const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
-        
-        localStorage.setItem('isAuth', 'true');
-        localStorage.setItem('userName', name);
-        
-        window.location.href = '/'; 
+        setError('');
+
+        // Собираем данные строго под структуру Java-сущности User
+        const userData = {
+            username: username, // Твое поле "Имя" передается как username
+            email: email,
+            password: password
+        };
+
+        try {
+            // Отправка на Spring Boot контроллер регистрации
+            const response = await axios.post('http://localhost:8080/api/auth/register', userData);
+            
+            if (response.status === 200 || response.status === 201) {
+                localStorage.setItem('isAuth', 'true');
+                window.location.href = '/'; // Перенаправление на главную
+            }
+        } catch (err: any) {
+            console.error("Ошибка регистрации:", err);
+            // Если бэкенд вернул текст ошибки (например, "Пароль слишком короткий"), покажем его
+            setError(err.response?.data?.message || "Ошибка при создании аккаунта. Проверьте длину пароля (от 8 символов).");
+        }
     };
 
     return (
@@ -21,14 +39,14 @@ const RegisterPage = () => {
             <div className="content-wrapper">
                 <div className="form-side">
                     <h1>РЕГИСТРАЦИЯ</h1>
+                    {error && <div style={{ color: '#8b2e2e', marginBottom: '15px', fontWeight: '600' }}>{error}</div>}
                     <form onSubmit={handleRegister}>
                         <div className="form-group">
                             <label>Имя</label>
                             <input 
                                 type="text" 
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                placeholder="Ваше имя"
+                                value={username} 
+                                onChange={(e) => setUsername(e.target.value)} 
                                 required 
                             />
                         </div>
@@ -36,8 +54,8 @@ const RegisterPage = () => {
                             <label>Email</label>
                             <input 
                                 type="email" 
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
+                                value={email} 
+                                onChange={(e) => setEmail(e.target.value)} 
                                 placeholder="example@mail.com" 
                                 required 
                             />
@@ -46,9 +64,9 @@ const RegisterPage = () => {
                             <label>Пароль</label>
                             <input 
                                 type="password" 
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="******" 
+                                value={password} 
+                                onChange={(e) => setPassword(e.target.value)} 
+                                placeholder="Минимум 8 символов" 
                                 required 
                             />
                         </div>

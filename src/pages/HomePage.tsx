@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import Map from '../components/Map';
 import MoodCards from '../components/MoodCards';
 import { WalkingSettings } from '../components/WalkingSettings';
@@ -10,6 +11,7 @@ const HomePage = () => {
   const [selectedMood, setSelectedMood] = useState('relax');
   const [duration, setDuration] = useState(90);
   const [speed, setSpeed] = useState('Средне'); 
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const handleRouteClick = () => {
     const isAuth = localStorage.getItem('isAuth') === 'true';
@@ -17,6 +19,28 @@ const HomePage = () => {
       navigate('/login');
     } else {
       setShowSettings(!showSettings);
+    }
+  };
+
+  // Новая функция отправки параметров на бэкенд для генерации
+  const handleGenerateRoute = async () => {
+    setIsGenerating(true);
+    try {
+      const response = await axios.post('http://localhost:8080/api/routes/generate', {
+        mood: selectedMood,
+        duration: duration,
+        speed: speed
+      });
+
+      if (response.data) {
+        // Передаем полученный сгенерированный маршрут на страницу /route через state
+        navigate('/route', { state: { routeData: response.data } });
+      }
+    } catch (error) {
+      console.error("Ошибка при генерации маршрута бэкендом:", error);
+      alert("Не удалось сгенерировать маршрут. Проверьте, запущен ли бэкенд-сервер.");
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -84,22 +108,24 @@ const HomePage = () => {
               />
             </div>
 
+            {/* ИСПРАВЛЕНО: Кнопка теперь вызывает handleGenerateRoute и блокируется во время загрузки */}
             <button 
-              onClick={() => navigate('/route')}
+              onClick={handleGenerateRoute}
+              disabled={isGenerating}
               style={{ 
                 marginTop: '50px', 
                 width: '100%', 
                 padding: '20px', 
-                backgroundColor: '#4a6a4a', 
+                backgroundColor: isGenerating ? '#ccdccd' : '#4a6a4a', 
                 color: 'white', 
                 border: 'none', 
                 borderRadius: '15px', 
                 fontWeight: 'bold', 
                 fontSize: '18px',
-                cursor: 'pointer' 
+                cursor: isGenerating ? 'not-allowed' : 'pointer' 
               }}
             >
-              Сгенерировать маршрут →
+              {isGenerating ? 'Генерация алгоритмом...' : 'Сгенерировать маршрут →'}
             </button>
           </div>
         </div>
