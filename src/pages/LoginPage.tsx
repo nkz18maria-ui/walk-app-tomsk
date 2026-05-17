@@ -12,13 +12,21 @@ const LoginPage = () => {
         setError('');
         
         try {
-            // Отправляем запрос авторизации на Spring Boot
-            await axios.post('http://10.114.4.235:8080/api/auth/login', {
+            const response = await axios.post('http://10.114.4.235:8080/api/auth/login', {
                 email,
                 password
             });
             
             localStorage.setItem('isAuth', 'true');
+            
+            // Забираем имя из ответа сервера и сохраняем в браузер
+            if (response.data && response.data.username) {
+                localStorage.setItem('username', response.data.username);
+            } else if (response.data && response.data.name) {
+                // На случай, если бэкендер назвал поле "name" вместо "username"
+                localStorage.setItem('username', response.data.name);
+            }
+
             window.location.href = '/'; 
         } catch (err: any) {
             console.error("Ошибка входа:", err);

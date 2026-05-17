@@ -12,28 +12,28 @@ const RegisterPage = () => {
         e.preventDefault();
         setError('');
 
-        // Собираем данные строго под структуру Java-сущности User
         const userData = {
-            username: username, // Твое поле "Имя" передается как username
+            username: username,
             email: email,
             password: password
         };
 
         try {
-            // Отправка на Spring Boot контроллер регистрации
             const response = await axios.post('http://10.114.4.235:8080/api/auth/register', userData);
             
             if (response.status === 200 || response.status === 201) {
                 localStorage.setItem('isAuth', 'true');
-                window.location.href = '/'; // Перенаправление на главную
+                // Сохраняем имя, которое пользователь только что ввёл в инпут
+                localStorage.setItem('username', username); 
+                
+                window.location.href = '/'; 
             }
         } catch (err: any) {
             console.error("Ошибка регистрации:", err);
-            // Если бэкенд вернул текст ошибки (например, "Пароль слишком короткий"), покажем его
             setError(err.response?.data?.message || "Ошибка при создании аккаунта. Проверьте длину пароля (от 8 символов).");
         }
     };
-
+    
     return (
         <div className="main-container">
             <div className="content-wrapper">
