@@ -22,18 +22,16 @@ const HomePage = () => {
     }
   };
 
-  // Новая функция отправки параметров на бэкенд для генерации
   const handleGenerateRoute = async () => {
     setIsGenerating(true);
     try {
-      const response = await axios.post('http://localhost:8080/api/routes/generate', {
+      const response = await axios.post('http://10.114.4.235:8080/api/routes/generate', {
         mood: selectedMood,
         duration: duration,
         speed: speed
       });
 
       if (response.data) {
-        // Передаем полученный сгенерированный маршрут на страницу /route через state
         navigate('/route', { state: { routeData: response.data } });
       }
     } catch (error) {
@@ -108,7 +106,7 @@ const HomePage = () => {
               />
             </div>
 
-            {/* ИСПРАВЛЕНО: Кнопка теперь вызывает handleGenerateRoute и блокируется во время загрузки */}
+            {}
             <button 
               onClick={handleGenerateRoute}
               disabled={isGenerating}

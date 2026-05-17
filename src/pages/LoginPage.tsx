@@ -13,13 +13,13 @@ const LoginPage = () => {
         
         try {
             // Отправляем запрос авторизации на Spring Boot
-            await axios.post('http://localhost:8080/api/auth/login', {
+            await axios.post('http://10.114.4.235:8080/api/auth/login', {
                 email,
                 password
             });
             
             localStorage.setItem('isAuth', 'true');
-            window.location.href = '/'; // Перезагружаем страницу на главной, чтобы Header обновился
+            window.location.href = '/'; 
         } catch (err: any) {
             console.error("Ошибка входа:", err);
             setError(err.response?.data?.message || 'Неверный email или пароль');

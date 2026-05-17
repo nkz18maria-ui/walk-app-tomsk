@@ -3,7 +3,7 @@ import { useState } from 'react';
 export const WalkingSettings = ({ duration, setDuration, speed, setSpeed }: any) => {
   const [useWeather, setUseWeather] = useState(true);
 
-  // Сопоставление темпа с иконками как на макете
+  
   const speedOptions = [
     { id: 'Медленно', label: 'Медленный', icon: '🐢' },
     { id: 'Средне', label: 'Обычный', icon: '🚶' },
@@ -13,7 +13,7 @@ export const WalkingSettings = ({ duration, setDuration, speed, setSpeed }: any)
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
       
-      {/* 1. Интерактивный таймлайн */}
+      {/*  Интерактивный таймлайн */}
       <div style={{ backgroundColor: 'white', padding: '25px', borderRadius: '25px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
         <h3 style={{ color: '#333', fontSize: '16px', marginBottom: '20px', fontWeight: '600' }}>Продолжительность</h3>
         <div style={{ position: 'relative', padding: '0 10px' }}>
@@ -52,9 +52,9 @@ export const WalkingSettings = ({ duration, setDuration, speed, setSpeed }: any)
         </div>
       </div>
 
-      {/* 2. Темп ходьбы с иконками */}
+      {/*  Темп ходьбы с иконками */}
       <div style={{ backgroundColor: 'white', padding: '25px', borderRadius: '25px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
-        <h3 style={{ color: '#333', fontSize: '16px', marginBottom: '15px', fontWeight: '600' }}>Дополнительные параметры</h3>
+        <h3 style={{ color: '#333', fontSize: '16px', marginBottom: '15px', fontWeight: '600' }}>Темп ходьбы</h3>
         <div style={{ display: 'flex', gap: '12px', marginBottom: '20px' }}>
           {speedOptions.map(opt => (
             <button
@@ -73,7 +73,7 @@ export const WalkingSettings = ({ duration, setDuration, speed, setSpeed }: any)
           ))}
         </div>
 
-        {/* 3. Переключатель погоды */}
+        {/*  Переключатель погоды */}
         <div style={{ 
           display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
           paddingTop: '15px', borderTop: '1px solid #f0f0f0' 

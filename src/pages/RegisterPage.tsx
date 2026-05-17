@@ -21,7 +21,7 @@ const RegisterPage = () => {
 
         try {
             // Отправка на Spring Boot контроллер регистрации
-            const response = await axios.post('http://localhost:8080/api/auth/register', userData);
+            const response = await axios.post('http://10.114.4.235:8080/api/auth/register', userData);
             
             if (response.status === 200 || response.status === 201) {
                 localStorage.setItem('isAuth', 'true');
