@@ -1,31 +1,69 @@
 name: CI — Main
 
 on:
-  pull_request:
-    branches: [main]
   push:
+    branches: [main]
+    paths-ignore:
+      - "package.json"
+      - "package-lock.json"
+  pull_request:
     branches: [main]
 
 jobs:
-  frontend-ci:
-    name: Frontend CI (reusable)
+  ci:
+    name: Frontend CI
     uses: clvster/tripgen-devops/.github/workflows/reusable-frontend-ci.yml@main
-    secrets:
-      GH_PAT: ${{ secrets.GH_PAT }}
+
+  secrets-scan:
+    name: Secrets Scan
+    uses: clvster/tripgen-devops/.github/workflows/reusable-secrets-scan.yml@main
+
+  bump-minor:
+    name: Bump minor version
+    runs-on: ubuntu-latest
+    needs: [ci, secrets-scan]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    outputs:
+      version: ${{ steps.bump.outputs.new_version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Bump minor in package.json
+        id: bump
+        run: |
+          CURRENT=$(node -p "require('./package.json').version")
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+          NEW="$MAJOR.$((MINOR + 1)).$PATCH"
+          echo "new_version=$NEW" >> $GITHUB_OUTPUT
+          npm version "$NEW" --no-git-tag-version
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          git commit -m "chore: release frontend v$NEW [skip ci]"
+          git tag "frontend-v$NEW"
+          git push origin main
+          git push origin "frontend-v$NEW"
 
   notify-devops:
-    name: Notify devops repo
-    needs: frontend-ci
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    name: Notify tripgen-devops
     runs-on: ubuntu-latest
+    needs: bump-minor
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
-      - name: Send repository_dispatch to tripgen-devops
-        uses: actions/github-script@v7
+      - uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.DEVOPS_PAT }}
           script: |
             await github.rest.repos.createDispatchEvent({
-              owner: context.repo.owner,
+              owner: 'clvster',
               repo: 'tripgen-devops',
               event_type: 'frontend-updated',
             });
