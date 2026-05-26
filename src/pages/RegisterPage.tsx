@@ -19,21 +19,19 @@ const RegisterPage = () => {
         };
 
         try {
-            const response = await axios.post('http://10.114.4.235:8080/api/auth/register', userData);
-            
+            const response = await axios.post('/api/auth/register', userData);
+
             if (response.status === 200 || response.status === 201) {
                 localStorage.setItem('isAuth', 'true');
-                // Сохраняем имя, которое пользователь только что ввёл в инпут
-                localStorage.setItem('username', username); 
-                
-                window.location.href = '/'; 
+                localStorage.setItem('username', username);
+                window.location.href = '/';
             }
         } catch (err: any) {
             console.error("Ошибка регистрации:", err);
             setError(err.response?.data?.message || "Ошибка при создании аккаунта. Проверьте длину пароля (от 8 символов).");
         }
     };
-    
+
     return (
         <div className="main-container">
             <div className="content-wrapper">
@@ -43,31 +41,31 @@ const RegisterPage = () => {
                     <form onSubmit={handleRegister}>
                         <div className="form-group">
                             <label>Имя</label>
-                            <input 
-                                type="text" 
-                                value={username} 
-                                onChange={(e) => setUsername(e.target.value)} 
-                                required 
+                            <input
+                                type="text"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                required
                             />
                         </div>
                         <div className="form-group">
                             <label>Email</label>
-                            <input 
-                                type="email" 
-                                value={email} 
-                                onChange={(e) => setEmail(e.target.value)} 
-                                placeholder="example@mail.com" 
-                                required 
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="example@mail.com"
+                                required
                             />
                         </div>
                         <div className="form-group">
                             <label>Пароль</label>
-                            <input 
-                                type="password" 
-                                value={password} 
-                                onChange={(e) => setPassword(e.target.value)} 
-                                placeholder="Минимум 8 символов" 
-                                required 
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Минимум 8 символов"
+                                required
                             />
                         </div>
                         <button type="submit" className="btn btn-primary">Зарегистрироваться</button>
