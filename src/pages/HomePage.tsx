@@ -10,7 +10,7 @@ const HomePage = () => {
   const [showSettings, setShowSettings] = useState(false);
   const [selectedMood, setSelectedMood] = useState('relax');
   const [duration, setDuration] = useState(90);
-  const [speed, setSpeed] = useState('Средне'); 
+  const [speed, setSpeed] = useState('Средне');
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleRouteClick = () => {
@@ -25,7 +25,7 @@ const HomePage = () => {
   const handleGenerateRoute = async () => {
     setIsGenerating(true);
     try {
-      const response = await axios.post('http://10.114.4.235:8080/api/routes/generate', {
+      const response = await axios.post('/api/routes/generate', {
         mood: selectedMood,
         duration: duration,
         speed: speed
@@ -43,16 +43,16 @@ const HomePage = () => {
   };
 
   return (
-    <div style={{ 
+    <div style={{
       minHeight: '100vh',
-      backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url('/images/background.jpg')`, 
+      backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url('/images/background.jpg')`,
       backgroundSize: 'cover',
       backgroundPosition: 'center',
       backgroundAttachment: 'fixed',
-      padding: '60px', 
-      fontFamily: "'Segoe UI', sans-serif" 
+      padding: '60px',
+      fontFamily: "'Segoe UI', sans-serif"
     }}>
-      
+
       <div style={{ display: 'flex', gap: '50px', alignItems: 'center', marginBottom: '40px' }}>
         <div style={{ flex: 1.2 }}>
           <h1 style={{ fontSize: '70px', fontWeight: 'bold', lineHeight: '1.1', color: '#4a6a4a', margin: '0 0 20px 0' }}>
@@ -67,16 +67,16 @@ const HomePage = () => {
         </div>
       </div>
 
-      <button 
-        onClick={handleRouteClick} 
-        style={{ 
-          padding: '18px 45px', 
-          fontSize: '20px', 
-          backgroundColor: '#4a6a4a', 
-          color: 'white', 
-          border: 'none', 
-          borderRadius: '15px', 
-          cursor: 'pointer', 
+      <button
+        onClick={handleRouteClick}
+        style={{
+          padding: '18px 45px',
+          fontSize: '20px',
+          backgroundColor: '#4a6a4a',
+          color: 'white',
+          border: 'none',
+          borderRadius: '15px',
+          cursor: 'pointer',
           fontWeight: '600'
         }}
       >
@@ -84,43 +84,43 @@ const HomePage = () => {
       </button>
 
       {showSettings && (
-        <div style={{ 
-          marginTop: '30px', 
-          backgroundColor: 'rgba(255, 255, 255, 0.9)', 
+        <div style={{
+          marginTop: '30px',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
           backdropFilter: 'blur(10px)',
-          padding: '40px 60px', 
-          borderRadius: '20px', 
+          padding: '40px 60px',
+          borderRadius: '20px',
           borderTop: '1px solid #e0eee0',
           margin: '30px -60px 0 -60px'
         }}>
           <div style={{ maxWidth: '800px', margin: '0 auto' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
-              
+
               <MoodCards activeMoodId={selectedMood} onSelect={setSelectedMood} />
 
-              <WalkingSettings 
-                duration={duration} 
-                setDuration={setDuration} 
-                speed={speed} 
-                setSpeed={setSpeed} 
+              <WalkingSettings
+                duration={duration}
+                setDuration={setDuration}
+                speed={speed}
+                setSpeed={setSpeed}
               />
             </div>
 
             {}
-            <button 
+            <button
               onClick={handleGenerateRoute}
               disabled={isGenerating}
-              style={{ 
-                marginTop: '50px', 
-                width: '100%', 
-                padding: '20px', 
-                backgroundColor: isGenerating ? '#ccdccd' : '#4a6a4a', 
-                color: 'white', 
-                border: 'none', 
-                borderRadius: '15px', 
-                fontWeight: 'bold', 
+              style={{
+                marginTop: '50px',
+                width: '100%',
+                padding: '20px',
+                backgroundColor: isGenerating ? '#ccdccd' : '#4a6a4a',
+                color: 'white',
+                border: 'none',
+                borderRadius: '15px',
+                fontWeight: 'bold',
                 fontSize: '18px',
-                cursor: isGenerating ? 'not-allowed' : 'pointer' 
+                cursor: isGenerating ? 'not-allowed' : 'pointer'
               }}
             >
               {isGenerating ? 'Генерация алгоритмом...' : 'Сгенерировать маршрут →'}

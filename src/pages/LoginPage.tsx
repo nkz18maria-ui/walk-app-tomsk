@@ -10,24 +10,22 @@ const LoginPage = () => {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        
+
         try {
-            const response = await axios.post('http://10.114.4.235:8080/api/auth/login', {
+            const response = await axios.post('/api/auth/login', {
                 email,
                 password
             });
-            
+
             localStorage.setItem('isAuth', 'true');
-            
-            // Забираем имя из ответа сервера и сохраняем в браузер
+
             if (response.data && response.data.username) {
                 localStorage.setItem('username', response.data.username);
             } else if (response.data && response.data.name) {
-                // На случай, если бэкендер назвал поле "name" вместо "username"
                 localStorage.setItem('username', response.data.name);
             }
 
-            window.location.href = '/'; 
+            window.location.href = '/';
         } catch (err: any) {
             console.error("Ошибка входа:", err);
             setError(err.response?.data?.message || 'Неверный email или пароль');
@@ -43,22 +41,22 @@ const LoginPage = () => {
                     <form onSubmit={handleLogin}>
                         <div className="form-group">
                             <label>Email</label>
-                            <input 
-                                type="email" 
+                            <input
+                                type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder="example@mail.com" 
-                                required 
+                                placeholder="example@mail.com"
+                                required
                             />
                         </div>
                         <div className="form-group">
                             <label>Пароль</label>
-                            <input 
-                                type="password" 
+                            <input
+                                type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                placeholder="не менее 8 символов" 
-                                required 
+                                placeholder="не менее 8 символов"
+                                required
                             />
                         </div>
                         <button type="submit" className="btn btn-primary">Войти</button>
