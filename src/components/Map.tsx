@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useMemo } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { Map, Marker } from 'pigeon-maps';
 
 export interface MapPoint {
@@ -11,7 +11,6 @@ export interface MapPoint {
 
 const TOMSK: [number, number] = [56.467, 84.948];
 
-// Web Mercator projection: lat/lng → world pixel coords at given zoom
 const toWorld = (lat: number, lng: number, zoom: number): [number, number] => {
   const scale = 256 * Math.pow(2, zoom);
   const x = ((lng + 180) / 360) * scale;
@@ -26,21 +25,35 @@ interface MapComponentProps {
 
 const MapComponent = ({ points }: MapComponentProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [mapState, setMapState] = useState<{ center: [number, number]; zoom: number }>({
-    center: TOMSK,
-    zoom: 13,
-  });
 
-  const toPixel = useCallback(
-    (lat: number, lng: number): [number, number] => {
+  // Pixel coords stored in state — computed only inside event handlers, never during render
+  const [routePixels, setRoutePixels] = useState<[number, number][]>([]);
+  const [markerPixels, setMarkerPixels] = useState<[number, number][]>([]);
+
+  const hasRoute = points && points.length >= 2;
+
+  // Called from onBoundsChanged (event handler) — ref access here is allowed
+  const recomputePixels = useCallback(
+    (center: [number, number], zoom: number) => {
       const el = containerRef.current;
-      if (!el) return [0, 0];
+      if (!el) return;
       const { width, height } = el.getBoundingClientRect();
-      const [cx, cy] = toWorld(mapState.center[0], mapState.center[1], mapState.zoom);
-      const [px, py] = toWorld(lat, lng, mapState.zoom);
-      return [width / 2 + (px - cx), height / 2 + (py - cy)];
+
+      const toPixel = (lat: number, lng: number): [number, number] => {
+        const [cx, cy] = toWorld(center[0], center[1], zoom);
+        const [px, py] = toWorld(lat, lng, zoom);
+        return [width / 2 + (px - cx), height / 2 + (py - cy)];
+      };
+
+      if (points && points.length >= 2) {
+        setRoutePixels([...points, points[0]].map(p => toPixel(p.latitude, p.longitude)));
+        setMarkerPixels(points.map(p => toPixel(p.latitude, p.longitude)));
+      } else {
+        setRoutePixels([]);
+        setMarkerPixels([]);
+      }
     },
-    [mapState]
+    [points]
   );
 
   const defaultCenter: [number, number] =
@@ -51,29 +64,17 @@ const MapComponent = ({ points }: MapComponentProps) => {
         ]
       : TOMSK;
 
-  const hasRoute = points && points.length >= 2;
-
-  const routePixels = useMemo(
-    () => (hasRoute ? [...points, points[0]].map(p => toPixel(p.latitude, p.longitude)) : []),
-    [hasRoute, points, toPixel]
-  );
-
-  const markerPixels = useMemo(
-    () => (hasRoute ? points.map(p => toPixel(p.latitude, p.longitude)) : []),
-    [hasRoute, points, toPixel]
-  );
-
   return (
     <div ref={containerRef} style={{ width: '100%', height: '100%', position: 'relative' }}>
       <Map
         defaultCenter={defaultCenter}
         defaultZoom={points && points.length > 0 ? 14 : 13}
-        onBoundsChanged={({ center, zoom }) => setMapState({ center, zoom })}
+        onBoundsChanged={({ center, zoom }) => recomputePixels(center, zoom)}
       >
         {!hasRoute && <Marker anchor={TOMSK} color="#4a6a4a" />}
       </Map>
 
-      {hasRoute && (
+      {hasRoute && routePixels.length > 0 && (
         <svg
           style={{
             position: 'absolute',
@@ -96,7 +97,9 @@ const MapComponent = ({ points }: MapComponentProps) => {
           />
 
           {points.map((point, index) => {
-            const [x, y] = markerPixels[index];
+            const pixel = markerPixels[index];
+            if (!pixel) return null;
+            const [x, y] = pixel;
             return (
               <g key={point.id} transform={`translate(${x},${y})`}>
                 <circle r={14} fill="#4a6a4a" stroke="white" strokeWidth={2.5} />
