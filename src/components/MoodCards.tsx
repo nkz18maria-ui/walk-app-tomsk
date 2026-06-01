@@ -12,10 +12,10 @@ interface MoodCardsProps {
 }
 
 const moods: MoodData[] = [
-  { id: 'calm', label: 'Спокойное', icon: '/images/koala.png' },
-  { id: 'active', label: 'Активное', icon: '/images/sword.png' },
-  { id: 'romantic', label: 'Избранное', icon: '/images/heart.png' },
-  { id: 'study', label: 'Познавательное', icon: '/images/tower.png' },
+  { id: 'SPOKOINOE',     label: 'Спокойное',     icon: '/images/koala.png' },
+  { id: 'ACTIVNOE',      label: 'Активное',      icon: '/images/sword.png' },
+  { id: 'IZBRANOE',      label: 'Избранное',      icon: '/images/heart.png' },
+  { id: 'POZNAVATELNOE', label: 'Познавательное', icon: '/images/tower.png' },
 ];
 
 const COLORS = {

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 const LoginPage = () => {
-    const [email, setEmail] = useState('');
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
 
@@ -13,22 +13,21 @@ const LoginPage = () => {
 
         try {
             const response = await axios.post('/api/auth/login', {
-                email,
+                username,
                 password
             });
 
             localStorage.setItem('isAuth', 'true');
+            localStorage.setItem('username', username);
 
-            if (response.data && response.data.username) {
-                localStorage.setItem('username', response.data.username);
-            } else if (response.data && response.data.name) {
-                localStorage.setItem('username', response.data.name);
+            if (response.data?.token) {
+                localStorage.setItem('token', response.data.token);
             }
 
             window.location.href = '/';
         } catch (err: any) {
             console.error("Ошибка входа:", err);
-            setError(err.response?.data?.message || 'Неверный email или пароль');
+            setError(err.response?.data?.message || 'Неверный логин или пароль');
         }
     };
 
@@ -40,12 +39,12 @@ const LoginPage = () => {
                     {error && <div style={{ color: '#8b2e2e', marginBottom: '15px', fontWeight: '600' }}>{error}</div>}
                     <form onSubmit={handleLogin}>
                         <div className="form-group">
-                            <label>Email</label>
+                            <label>Имя пользователя</label>
                             <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="example@mail.com"
+                                type="text"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                                placeholder="Ваш username"
                                 required
                             />
                         </div>

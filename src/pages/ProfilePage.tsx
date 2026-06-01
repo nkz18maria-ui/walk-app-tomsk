@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  User, MapPin, Milestone, History, Settings, Eye, Trophy
+import axios from 'axios';
+import {
+  User, MapPin, Milestone, Eye, Trophy, Plus, X, CheckCircle, Trash2
 } from 'lucide-react';
 
 // НОВАЯ СВЕТЛАЯ ЭКО-ПАЛИТРА
@@ -16,22 +17,88 @@ const LIGHT_THEME = {
   shadow: '0 4px 20px rgba(74, 106, 74, 0.06)' // Легкая воздушная тень
 };
 
+const MOOD_OPTIONS = [
+    { value: 'SPOKOINOE',     label: 'Спокойное' },
+    { value: 'ACTIVNOE',      label: 'Активное' },
+    { value: 'IZBRANOE',      label: 'Избранное' },
+    { value: 'POZNAVATELNOE', label: 'Познавательное' },
+];
+
+interface Point {
+    id: number;
+    name: string;
+    description: string;
+    latitude: number;
+    longitude: number;
+    mood: string;
+}
+
 const ProfilePage = () => {
     const navigate = useNavigate();
-    
+
     const [username, setUsername] = useState('Загрузка...');
-    const [savedRoutes, setSavedRoutes] = useState([]); 
-    const [history, setHistory] = useState([]);         
+    const [savedRoutes, setSavedRoutes] = useState([]);
+    const [history, setHistory] = useState([]);
     const [stats, setStats] = useState({ totalKm: 0, locations: 0, level: 1, xp: 10 });
+
+    const [points, setPoints] = useState<Point[]>([]);
+    const [showPointForm, setShowPointForm] = useState(false);
+    const [pointForm, setPointForm] = useState({ name: '', description: '', latitude: '', longitude: '', mood: 'SPOKOINOE' });
+    const [pointLoading, setPointLoading] = useState(false);
+    const [pointError, setPointError] = useState('');
+    const [pointSuccess, setPointSuccess] = useState(false);
+
+    const authHeaders = () => ({
+        headers: { Authorization: `Bearer ${localStorage.getItem('token') || ''}` }
+    });
+
+    const loadPoints = async () => {
+        try {
+            const res = await axios.get('/api/points', authHeaders());
+            setPoints(res.data);
+        } catch {
+            // список точек не критичен при первой загрузке
+        }
+    };
 
     useEffect(() => {
         const storedName = localStorage.getItem('username');
-        if (storedName) {
-            setUsername(storedName);
-        } else {
-            setUsername('Исследователь');
-        }
+        setUsername(storedName || 'Исследователь');
+        loadPoints();
     }, []);
+
+    const handleAddPoint = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setPointLoading(true);
+        setPointError('');
+        setPointSuccess(false);
+        try {
+            await axios.post('/api/points', {
+                name: pointForm.name,
+                description: pointForm.description,
+                latitude: parseFloat(pointForm.latitude),
+                longitude: parseFloat(pointForm.longitude),
+                mood: pointForm.mood,
+            }, authHeaders());
+            setPointSuccess(true);
+            setPointForm({ name: '', description: '', latitude: '', longitude: '', mood: 'SPOKOINOE' });
+            setShowPointForm(false);
+            await loadPoints();
+        } catch (err: any) {
+            setPointError(err.response?.data?.message || 'Не удалось сохранить точку');
+        } finally {
+            setPointLoading(false);
+        }
+    };
+
+    const handleDeletePoint = async (id: number) => {
+        try {
+            await axios.delete(`/api/points/${id}`, authHeaders());
+            setPoints(prev => prev.filter(p => p.id !== id));
+        } catch {
+            // игнорируем
+        }
+    };
 
     return (
         <div style={{ 
@@ -137,7 +204,7 @@ const ProfilePage = () => {
                         {/* БЛОК: Route History */}
                         <div style={cardStyle}>
                             <div style={cardTitleStyle}>История маршрутов</div>
-                            
+
                             {history.length === 0 ? (
                                 <div style={{ color: LIGHT_THEME.textMuted, fontStyle: 'italic', fontSize: '14px', textAlign: 'center', padding: '15px 0' }}>
                                     История прогулок пуста. Исследуйте Томск, чтобы наполнить этот блок!
@@ -149,6 +216,132 @@ const ProfilePage = () => {
                                             <span style={{ color: LIGHT_THEME.textMuted, fontWeight: '500' }}>{item.date}</span>
                                             <span style={{ color: LIGHT_THEME.textMain, fontWeight: '600' }}>Маршрут: {item.distance} km</span>
                                             <span style={{ color: '#2ecc71', fontWeight: '600' }}>✓ Завершен</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* БЛОК: Мои точки */}
+                        <div style={cardStyle}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                <div style={cardTitleStyle}>Мои точки</div>
+                                <button
+                                    onClick={() => { setShowPointForm(v => !v); setPointError(''); setPointSuccess(false); }}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: '6px',
+                                        padding: '8px 14px', borderRadius: '10px', border: 'none', cursor: 'pointer',
+                                        backgroundColor: showPointForm ? '#f0f0f0' : LIGHT_THEME.accent,
+                                        color: showPointForm ? LIGHT_THEME.textMuted : 'white',
+                                        fontSize: '13px', fontWeight: '600', transition: 'all 0.2s'
+                                    }}
+                                >
+                                    {showPointForm ? <><X size={14} /> Отмена</> : <><Plus size={14} /> Добавить точку</>}
+                                </button>
+                            </div>
+
+                            {showPointForm && (
+                                <form onSubmit={handleAddPoint} style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px', padding: '20px', backgroundColor: '#f9fbf9', borderRadius: '12px', border: `1px solid ${LIGHT_THEME.border}` }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                        <div>
+                                            <label style={formLabelStyle}>Название</label>
+                                            <input
+                                                style={formInputStyle}
+                                                value={pointForm.name}
+                                                onChange={e => setPointForm(f => ({ ...f, name: e.target.value }))}
+                                                placeholder="Парк Лагерный сад"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label style={formLabelStyle}>Настроение</label>
+                                            <select
+                                                style={formInputStyle}
+                                                value={pointForm.mood}
+                                                onChange={e => setPointForm(f => ({ ...f, mood: e.target.value }))}
+                                            >
+                                                {MOOD_OPTIONS.map(o => (
+                                                    <option key={o.value} value={o.value}>{o.label}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label style={formLabelStyle}>Описание</label>
+                                        <input
+                                            style={formInputStyle}
+                                            value={pointForm.description}
+                                            onChange={e => setPointForm(f => ({ ...f, description: e.target.value }))}
+                                            placeholder="Живописная набережная с видом на реку"
+                                        />
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                        <div>
+                                            <label style={formLabelStyle}>Широта</label>
+                                            <input
+                                                style={formInputStyle}
+                                                type="number" step="any"
+                                                value={pointForm.latitude}
+                                                onChange={e => setPointForm(f => ({ ...f, latitude: e.target.value }))}
+                                                placeholder="56.4977"
+                                                required
+                                            />
+                                        </div>
+                                        <div>
+                                            <label style={formLabelStyle}>Долгота</label>
+                                            <input
+                                                style={formInputStyle}
+                                                type="number" step="any"
+                                                value={pointForm.longitude}
+                                                onChange={e => setPointForm(f => ({ ...f, longitude: e.target.value }))}
+                                                placeholder="84.9744"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                    {pointError && (
+                                        <div style={{ color: '#8b2e2e', fontSize: '13px', fontWeight: '600' }}>{pointError}</div>
+                                    )}
+                                    <button
+                                        type="submit"
+                                        disabled={pointLoading}
+                                        style={{
+                                            padding: '12px', borderRadius: '10px', border: 'none', cursor: pointLoading ? 'not-allowed' : 'pointer',
+                                            backgroundColor: pointLoading ? '#ccdccd' : LIGHT_THEME.accent,
+                                            color: 'white', fontWeight: '600', fontSize: '14px'
+                                        }}
+                                    >
+                                        {pointLoading ? 'Сохранение...' : 'Сохранить точку'}
+                                    </button>
+                                </form>
+                            )}
+
+                            {pointSuccess && !showPointForm && (
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#2e7d32', fontSize: '13px', marginBottom: '16px', fontWeight: '600' }}>
+                                    <CheckCircle size={16} /> Точка успешно добавлена
+                                </div>
+                            )}
+
+                            {points.length === 0 ? (
+                                <div style={{ color: LIGHT_THEME.textMuted, fontStyle: 'italic', fontSize: '14px', textAlign: 'center', padding: '10px 0' }}>
+                                    Нет добавленных точек. Добавьте первую!
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    {points.map(point => (
+                                        <div key={point.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', backgroundColor: '#f9fbf9', borderRadius: '10px', border: `1px solid ${LIGHT_THEME.border}` }}>
+                                            <div>
+                                                <div style={{ fontWeight: '600', fontSize: '14px', color: LIGHT_THEME.textMain }}>{point.name}</div>
+                                                <div style={{ fontSize: '12px', color: LIGHT_THEME.textMuted, marginTop: '2px' }}>
+                                                    {MOOD_OPTIONS.find(o => o.value === point.mood)?.label ?? point.mood} · {point.latitude}, {point.longitude}
+                                                </div>
+                                            </div>
+                                            <button
+                                                onClick={() => handleDeletePoint(point.id)}
+                                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#c0392b', padding: '4px', borderRadius: '6px', display: 'flex', alignItems: 'center' }}
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
                                         </div>
                                     ))}
                                 </div>
@@ -293,6 +486,18 @@ const badgeLabelStyle: React.CSSProperties = { fontSize: '13px', color: LIGHT_TH
 
 const emptyStateStyle: React.CSSProperties = {
     border: `2px dashed ${LIGHT_THEME.border}`, borderRadius: '12px', padding: '40px 20px', textAlign: 'center', cursor: 'pointer', backgroundColor: '#fdfdfd', transition: 'background-color 0.2s'
+};
+
+const formLabelStyle: React.CSSProperties = {
+    display: 'block', fontSize: '12px', fontWeight: '600', color: LIGHT_THEME.textMuted,
+    textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '6px'
+};
+
+const formInputStyle: React.CSSProperties = {
+    width: '100%', padding: '10px 12px', borderRadius: '8px',
+    border: `1px solid ${LIGHT_THEME.border}`, fontSize: '14px',
+    color: LIGHT_THEME.textMain, backgroundColor: 'white', outline: 'none',
+    boxSizing: 'border-box'
 };
 
 export default ProfilePage;

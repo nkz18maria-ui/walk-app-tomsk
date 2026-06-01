@@ -5,9 +5,9 @@ export const WalkingSettings = ({ duration, setDuration, speed, setSpeed }: any)
 
   
   const speedOptions = [
-    { id: 'Медленно', label: 'Медленный', icon: '🐢' },
-    { id: 'Средне', label: 'Обычный', icon: '🚶' },
-    { id: 'Быстро', label: 'Быстрый', icon: '🐇' },
+    { id: 'SLOW',   label: 'Медленный', icon: '🐢' },
+    { id: 'NORMAL', label: 'Обычный',   icon: '🚶' },
+    { id: 'FAST',   label: 'Быстрый',   icon: '🐇' },
   ];
 
   return (
