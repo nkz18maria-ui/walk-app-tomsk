@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useMemo } from 'react';
 import { Map, Marker } from 'pigeon-maps';
 
 export interface MapPoint {
@@ -52,9 +52,16 @@ const MapComponent = ({ points }: MapComponentProps) => {
       : TOMSK;
 
   const hasRoute = points && points.length >= 2;
-  const routePixels = hasRoute
-    ? [...points, points[0]].map(p => toPixel(p.latitude, p.longitude))
-    : [];
+
+  const routePixels = useMemo(
+    () => (hasRoute ? [...points, points[0]].map(p => toPixel(p.latitude, p.longitude)) : []),
+    [hasRoute, points, toPixel]
+  );
+
+  const markerPixels = useMemo(
+    () => (hasRoute ? points.map(p => toPixel(p.latitude, p.longitude)) : []),
+    [hasRoute, points, toPixel]
+  );
 
   return (
     <div ref={containerRef} style={{ width: '100%', height: '100%', position: 'relative' }}>
@@ -89,7 +96,7 @@ const MapComponent = ({ points }: MapComponentProps) => {
           />
 
           {points.map((point, index) => {
-            const [x, y] = toPixel(point.latitude, point.longitude);
+            const [x, y] = markerPixels[index];
             return (
               <g key={point.id} transform={`translate(${x},${y})`}>
                 <circle r={14} fill="#4a6a4a" stroke="white" strokeWidth={2.5} />
