@@ -8,9 +8,9 @@ import { WalkingSettings } from '../components/WalkingSettings';
 const HomePage = () => {
   const navigate = useNavigate();
   const [showSettings, setShowSettings] = useState(false);
-  const [selectedMood, setSelectedMood] = useState('relax');
+  const [selectedMood, setSelectedMood] = useState('SPOKOINOE');
   const [duration, setDuration] = useState(90);
-  const [speed, setSpeed] = useState('Средне');
+  const [speed, setSpeed] = useState('NORMAL');
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleRouteClick = () => {
@@ -22,20 +22,34 @@ const HomePage = () => {
     }
   };
 
+  const SPEED_KMH: Record<string, number> = { SLOW: 3, NORMAL: 5, FAST: 7 };
+
+  const getUserLocation = (): Promise<[number, number]> =>
+    new Promise(resolve => {
+      navigator.geolocation.getCurrentPosition(
+        pos => resolve([pos.coords.latitude, pos.coords.longitude]),
+        () => resolve([56.4977, 84.9744]) // Томск — запасные координаты
+      );
+    });
+
   const handleGenerateRoute = async () => {
     setIsGenerating(true);
     try {
-      const response = await axios.post('/api/routes/generate', {
-        mood: selectedMood,
-        duration: duration,
-        speed: speed
-      });
+      const [userLatitude, userLongitude] = await getUserLocation();
+      const kmh = SPEED_KMH[speed] ?? 5;
+      const desiredDistanceKm = parseFloat(((duration / 60) * kmh).toFixed(2));
+
+      const response = await axios.post(
+        '/api/routes/generate',
+        { mood: selectedMood, desiredDistanceKm, tempo: speed, userLatitude, userLongitude },
+        { headers: { Authorization: `Bearer ${localStorage.getItem('token') || ''}` } }
+      );
 
       if (response.data) {
         navigate('/route', { state: { routeData: response.data } });
       }
     } catch (error) {
-      console.error("Ошибка при генерации маршрута бэкендом:", error);
+      console.error("Ошибка при генерации маршрута:", error);
       alert("Не удалось сгенерировать маршрут. Проверьте, запущен ли бэкенд-сервер.");
     } finally {
       setIsGenerating(false);
