@@ -1,5 +1,4 @@
 /* Общие стили */
-/* Добавь это в начало твоего файла стилей */
 html, body, #root {
   margin: 0;
   padding: 0;
@@ -15,7 +14,7 @@ html, body, #root {
 
     padding: 0;
 
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Похожий шрифт */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
 
 }
 
@@ -25,7 +24,7 @@ body {
 
     background-color: #f0f2f5;
 
-    background-image: url('../images/wooden_table.jpg'); /* На замену стола, если есть картинка */
+    background-image: url('../images/wooden_table.jpg');
 
     background-size: cover;
 
@@ -37,6 +36,12 @@ body {
 
     padding: 20px;
 
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 0;
+    }
 }
 
 
@@ -71,7 +76,7 @@ body {
 
     font-weight: bold;
 
-    color: #4a6a4a; /* Темно-зеленый */
+    color: #4a6a4a;
 
 }
 
@@ -255,7 +260,7 @@ input[type="password"] {
 
 .btn-primary {
 
-    background-color: #88a988; /* Тусклый зеленый с макета */
+    background-color: #88a988; 
 
     color: white;
 
@@ -265,7 +270,7 @@ input[type="password"] {
 
 .btn-secondary {
 
-    background-color: #e59e66; /* Оранжевый с макета */
+    background-color: #e59e66; 
 
     color: white;
 

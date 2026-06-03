@@ -4,17 +4,17 @@ import axios from 'axios';
 import {
   User, MapPin, Milestone, Eye, Trophy, Plus, X, CheckCircle, Trash2
 } from 'lucide-react';
+import { useIsMobile } from '../hooks/useIsMobile';
 
-// НОВАЯ СВЕТЛАЯ ЭКО-ПАЛИТРА
 const LIGHT_THEME = {
-  bg: '#f4f7f4',          // Светлый, слегка зеленоватый свежий фон
-  cardBg: '#ffffff',      // Чисто белый для карточек
-  accent: '#4a6a4a',      // Твой фирменный зеленый цвет для главных элементов
-  gold: '#dfb73a',        // Благородное золото для открытых ачивок
-  textMain: '#2c3e2c',    // Глубокий темно-зеленый вместо черного (читается мягко)
-  textMuted: '#7a927a',   // Приглушенный лесной для подписей
-  border: '#e2ebe2',      // Тонкие аккуратные светлые границы
-  shadow: '0 4px 20px rgba(74, 106, 74, 0.06)' // Легкая воздушная тень
+  bg: '#f4f7f4',
+  cardBg: '#ffffff',
+  accent: '#4a6a4a',
+  gold: '#dfb73a',
+  textMain: '#2c3e2c',
+  textMuted: '#7a927a',
+  border: '#e2ebe2',
+  shadow: '0 4px 20px rgba(74, 106, 74, 0.06)'
 };
 
 const MOOD_OPTIONS = [
@@ -35,11 +35,12 @@ interface Point {
 
 const ProfilePage = () => {
     const navigate = useNavigate();
+    const isMobile = useIsMobile();
 
     const [username, setUsername] = useState('Загрузка...');
-    const [savedRoutes, setSavedRoutes] = useState([]);
-    const [history, setHistory] = useState([]);
-    const [stats, setStats] = useState({ totalKm: 0, locations: 0, level: 1, xp: 10 });
+    const [savedRoutes] = useState([]);
+    const [history] = useState([]);
+    const [stats] = useState({ totalKm: 0, locations: 0, level: 1, xp: 10 });
 
     const [points, setPoints] = useState<Point[]>([]);
     const [showPointForm, setShowPointForm] = useState(false);
@@ -57,7 +58,7 @@ const ProfilePage = () => {
             const res = await axios.get('/api/points', authHeaders());
             setPoints(res.data);
         } catch {
-            // список точек не критичен при первой загрузке
+            // не критично при первой загрузке
         }
     };
 
@@ -67,7 +68,7 @@ const ProfilePage = () => {
         loadPoints();
     }, []);
 
-    const handleAddPoint = async (e: React.FormEvent) => {
+    const handleAddPoint = async (e: React.SyntheticEvent) => {
         e.preventDefault();
         setPointLoading(true);
         setPointError('');
@@ -101,54 +102,55 @@ const ProfilePage = () => {
     };
 
     return (
-        <div style={{ 
-            minHeight: '100vh', 
-            backgroundColor: LIGHT_THEME.bg, 
+        <div style={{
+            minHeight: '100vh',
+            backgroundColor: LIGHT_THEME.bg,
             color: LIGHT_THEME.textMain,
-            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", // Более современный шрифт без засечек
+            fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
             display: 'flex',
-            padding: '30px 40px'
+            padding: isMobile ? '16px' : '30px 40px',
         }}>
-            
-            {/* САЙДБАР (СЛЕВА) */}
-            <div style={{
-                width: '15px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                marginRight: '30px',
-                borderRight: `1px solid ${LIGHT_THEME.border}`,
-                paddingRight: '20px'
-            }}>
-            </div>
 
-            {/* ОСНОВНОЙ КОНТЕНТ ДАШБОРДА */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '25px' }}>
-                
-                <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: '30px', flex: 1 }}>
-                    
+            {/* ОСНОВНОЙ КОНТЕНТ */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: isMobile ? '1fr' : '1.8fr 1fr',
+                    gap: isMobile ? '16px' : '30px',
+                    flex: 1
+                }}>
+
                     {/* ЛЕВАЯ КОЛОНКА */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-                        
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '25px' }}>
+
                         {/* БЛОК: Personal Info */}
                         <div style={cardStyle}>
                             <div style={cardTitleStyle}></div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
-                                
-                                {/* Аватарка в мягком зеленом круге */}
-                                <div style={{ position: 'relative', width: '95px', height: '95px' }}>
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: isMobile ? 'column' : 'row',
+                                alignItems: isMobile ? 'flex-start' : 'center',
+                                gap: isMobile ? '20px' : '40px'
+                            }}>
+                                <div style={{ position: 'relative', width: '95px', height: '95px', flexShrink: 0 }}>
                                     <div style={avatarRingStyle}></div>
                                     <div style={avatarInsideStyle}>
                                         <User size={45} color={LIGHT_THEME.accent} />
                                     </div>
                                 </div>
 
-                                {/* Текстовые метрики */}
-                                <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '20px' }}>
+                                <div style={{
+                                    flex: 1,
+                                    display: 'grid',
+                                    gridTemplateColumns: isMobile ? '1fr' : '1.2fr 1fr',
+                                    gap: isMobile ? '16px' : '20px',
+                                    width: isMobile ? '100%' : undefined
+                                }}>
                                     <div>
                                         <div style={{ fontSize: '13px', color: LIGHT_THEME.textMuted, marginBottom: '2px', fontWeight: '600' }}>Name</div>
                                         <div style={{ fontSize: '24px', color: LIGHT_THEME.textMain, fontWeight: '700', marginBottom: '15px' }}>{username}</div>
-                                        
+
                                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginBottom: '6px' }}>
                                             <span style={{ color: LIGHT_THEME.textMuted, fontWeight: '500' }}>Level</span>
                                             <span style={{ color: LIGHT_THEME.accent, fontWeight: '700' }}>{stats.level}</span>
@@ -158,7 +160,17 @@ const ProfilePage = () => {
                                         </div>
                                     </div>
 
-                                    <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '18px', paddingLeft: '30px', borderLeft: `1px solid ${LIGHT_THEME.border}` }}>
+                                    <div style={{
+                                        display: 'flex',
+                                        flexDirection: 'row',
+                                        justifyContent: isMobile ? 'flex-start' : 'center',
+                                        gap: isMobile ? '24px' : '18px',
+                                        paddingLeft: isMobile ? '0' : '30px',
+                                        borderLeft: isMobile ? 'none' : `1px solid ${LIGHT_THEME.border}`,
+                                        borderTop: isMobile ? `1px solid ${LIGHT_THEME.border}` : 'none',
+                                        paddingTop: isMobile ? '16px' : '0',
+                                        flexWrap: 'wrap'
+                                    }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                             <div style={iconBoxStyle}><Milestone size={18} color={LIGHT_THEME.accent} /></div>
                                             <div>
@@ -175,20 +187,18 @@ const ProfilePage = () => {
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
                         </div>
 
                         {/* БЛОК: Favorites */}
                         <div style={cardStyle}>
                             <div style={cardTitleStyle}>Любимое</div>
-                            
                             {savedRoutes.length === 0 ? (
                                 <div style={emptyStateStyle} onClick={() => navigate('/')}>
                                     <span style={{ color: LIGHT_THEME.accent, fontWeight: '500' }}>+ У вас пока нет избранных маршрутов. Сгенерируйте первый!</span>
                                 </div>
                             ) : (
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: '15px' }}>
                                     {savedRoutes.map((route: any, index) => (
                                         <div key={index} style={{...favCardStyle, backgroundImage: `url(${route.img || '/images/forest_bg.jpg'})`}}>
                                             <div style={favCardOverlayStyle}>
@@ -204,7 +214,6 @@ const ProfilePage = () => {
                         {/* БЛОК: Route History */}
                         <div style={cardStyle}>
                             <div style={cardTitleStyle}>История маршрутов</div>
-
                             {history.length === 0 ? (
                                 <div style={{ color: LIGHT_THEME.textMuted, fontStyle: 'italic', fontSize: '14px', textAlign: 'center', padding: '15px 0' }}>
                                     История прогулок пуста. Исследуйте Томск, чтобы наполнить этот блок!
@@ -212,7 +221,7 @@ const ProfilePage = () => {
                             ) : (
                                 <div style={scrollHistoryStyle}>
                                     {history.map((item: any, index) => (
-                                        <div key={index} style={scrollRowStyle}>
+                                        <div key={index} style={isMobile ? scrollRowMobileStyle : scrollRowStyle}>
                                             <span style={{ color: LIGHT_THEME.textMuted, fontWeight: '500' }}>{item.date}</span>
                                             <span style={{ color: LIGHT_THEME.textMain, fontWeight: '600' }}>Маршрут: {item.distance} km</span>
                                             <span style={{ color: '#2ecc71', fontWeight: '600' }}>✓ Завершен</span>
@@ -242,7 +251,7 @@ const ProfilePage = () => {
 
                             {showPointForm && (
                                 <form onSubmit={handleAddPoint} style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px', padding: '20px', backgroundColor: '#f9fbf9', borderRadius: '12px', border: `1px solid ${LIGHT_THEME.border}` }}>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px' }}>
                                         <div>
                                             <label style={formLabelStyle}>Название</label>
                                             <input
@@ -275,7 +284,7 @@ const ProfilePage = () => {
                                             placeholder="Живописная набережная с видом на реку"
                                         />
                                     </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '12px' }}>
                                         <div>
                                             <label style={formLabelStyle}>Широта</label>
                                             <input
@@ -353,8 +362,8 @@ const ProfilePage = () => {
                     {/* ПРАВАЯ КОЛОНКА (Achievements) */}
                     <div style={achievementsPanelStyle}>
                         <div style={cardTitleStyle}>Достижения</div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '10px' }}>
-                            
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: isMobile ? '16px' : '20px', marginTop: '10px' }}>
+
                             <div style={stats.totalKm >= 10 ? badgeStyle : badgeLockedStyle}>
                                 <div style={{...badgeCircleStyle, borderColor: stats.totalKm >= 10 ? LIGHT_THEME.gold : LIGHT_THEME.border}}>
                                     <Trophy size={24} color={stats.totalKm >= 10 ? LIGHT_THEME.gold : LIGHT_THEME.textMuted} />
@@ -392,7 +401,7 @@ const ProfilePage = () => {
     );
 };
 
-// --- СТИЛИ ДЛЯ СВЕТЛОЙ ТЕМЫ ---
+// --- СТИЛИ ---
 
 const cardStyle: React.CSSProperties = {
     backgroundColor: LIGHT_THEME.cardBg,
@@ -411,66 +420,41 @@ const cardTitleStyle: React.CSSProperties = {
     fontWeight: '700'
 };
 
-const navIconStyle: React.CSSProperties = { 
-    color: LIGHT_THEME.textMuted, 
-    cursor: 'pointer', 
-    opacity: 0.7,
-    transition: 'color 0.2s'
-};
-
-const navIconActiveStyle: React.CSSProperties = {
-    color: LIGHT_THEME.accent, 
-    cursor: 'pointer', 
-    backgroundColor: 'rgba(74, 106, 74, 0.08)', 
-    padding: '10px', 
-    borderRadius: '12px',
-    fontWeight: 'bold'
-};
-
 const avatarRingStyle: React.CSSProperties = {
-    position: 'absolute', 
-    top: 0, 
-    left: 0, 
-    right: 0, 
-    bottom: 0,
-    borderRadius: '50%', 
-    // Возвращаем благородное золото и добавляем мягкое светящееся облако (тень)
-    border: `2px solid ${LIGHT_THEME.gold}`, 
-    boxShadow: `0 0 12px rgba(223, 183, 58, 0.4)`, 
+    position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+    borderRadius: '50%',
+    border: `2px solid ${LIGHT_THEME.gold}`,
+    boxShadow: `0 0 12px rgba(223, 183, 58, 0.4)`,
     zIndex: 1
 };
 
 const avatarInsideStyle: React.CSSProperties = {
-    width: '100%', 
-    height: '100%', 
-    borderRadius: '50%', 
-    // Делаем фон внутри кольца чуть светлее, чтобы иконка юзера смотрелась контрастно
-    backgroundColor: '#ffffff', 
-    display: 'flex', 
-    alignItems: 'center', 
-    justifyContent: 'center',
-    position: 'relative',
-    zIndex: 2
-};
-
-const energyBadgeStyle: React.CSSProperties = {
-    position: 'absolute', bottom: '-2px', left: '50%', transform: 'translateX(-50%)',
-    backgroundColor: '#2ecc71', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', boxShadow: '0 2px 5px rgba(0,0,0,0.1)'
+    width: '100%', height: '100%', borderRadius: '50%',
+    backgroundColor: '#ffffff',
+    display: 'flex', alignItems: 'center', justifyContent: 'center',
+    position: 'relative', zIndex: 2
 };
 
 const xpContainerStyle: React.CSSProperties = { height: '6px', backgroundColor: '#e2ebe2', borderRadius: '3px', overflow: 'hidden' };
 const xpfillStyle: React.CSSProperties = { height: '100%', backgroundColor: LIGHT_THEME.accent };
 
 const iconBoxStyle: React.CSSProperties = {
-    backgroundColor: 'rgba(74, 106, 74, 0.05)', padding: '8px', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center'
+    backgroundColor: 'rgba(74, 106, 74, 0.05)', padding: '8px', borderRadius: '8px',
+    display: 'flex', alignItems: 'center', justifyContent: 'center'
 };
 
 const favCardStyle: React.CSSProperties = { height: '140px', borderRadius: '12px', backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative', overflow: 'hidden', border: `1px solid ${LIGHT_THEME.border}` };
-const favCardOverlayStyle: React.CSSProperties = { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(255, 255, 255, 0.95)', padding: '12px', borderTop: `1px solid ${LIGHT_THEME.border}` };
+const favCardOverlayStyle: React.CSSProperties = { position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: 'rgba(255,255,255,0.95)', padding: '12px', borderTop: `1px solid ${LIGHT_THEME.border}` };
 const scrollHistoryStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: '12px' };
 
 const scrollRowStyle: React.CSSProperties = {
-    display: 'flex', justifyContent: 'space-between', padding: '14px 20px', backgroundColor: '#f9fbf9', borderRadius: '10px', fontSize: '14px', border: `1px solid ${LIGHT_THEME.border}`
+    display: 'flex', justifyContent: 'space-between', padding: '14px 20px',
+    backgroundColor: '#f9fbf9', borderRadius: '10px', fontSize: '14px', border: `1px solid ${LIGHT_THEME.border}`
+};
+
+const scrollRowMobileStyle: React.CSSProperties = {
+    display: 'flex', flexDirection: 'column', gap: '4px', padding: '12px 16px',
+    backgroundColor: '#f9fbf9', borderRadius: '10px', fontSize: '14px', border: `1px solid ${LIGHT_THEME.border}`
 };
 
 const achievementsPanelStyle: React.CSSProperties = { ...cardStyle, display: 'flex', flexDirection: 'column' };
@@ -485,7 +469,8 @@ const badgeCircleStyle: React.CSSProperties = {
 const badgeLabelStyle: React.CSSProperties = { fontSize: '13px', color: LIGHT_THEME.textMain, fontWeight: '500', maxWidth: '100px', lineHeight: '1.3' };
 
 const emptyStateStyle: React.CSSProperties = {
-    border: `2px dashed ${LIGHT_THEME.border}`, borderRadius: '12px', padding: '40px 20px', textAlign: 'center', cursor: 'pointer', backgroundColor: '#fdfdfd', transition: 'background-color 0.2s'
+    border: `2px dashed ${LIGHT_THEME.border}`, borderRadius: '12px', padding: '40px 20px',
+    textAlign: 'center', cursor: 'pointer', backgroundColor: '#fdfdfd', transition: 'background-color 0.2s'
 };
 
 const formLabelStyle: React.CSSProperties = {

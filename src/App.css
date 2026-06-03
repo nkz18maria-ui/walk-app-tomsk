@@ -7,32 +7,47 @@ body {
     background-color: #f4f7f6;
 }
 
-/* Шапка (на всю ширину) */
+/* Шапка */
 .site-header {
+    position: relative;
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 40px;
+    padding: 16px 40px;
     background-color: #fff;
     border-bottom: 1px solid #ddd;
+    z-index: 100;
 }
+
 .logo { font-size: 24px; font-weight: bold; color: #4a6a4a; }
 .nav-links { display: flex; list-style: none; gap: 20px; }
 .nav-link { text-decoration: none; color: #4a6a4a; font-weight: 600; }
 
+/* Гамбургер — скрыт на десктопе */
+.hamburger-btn {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+
 /* Контейнер для центрирования контента */
 .content-container {
     max-width: 900px;
-    margin: 50px auto; /* 50px отступ сверху, auto центрирует */
+    margin: 50px auto;
     padding: 0 20px;
 }
 
-/* Карточка страницы */
+/* Карточка страницы (Login/Register) */
 .main-container {
-    width: 100%;           /* Занимает всю доступную ширину */
-    max-width: 900px;      /* НО не шире 900px */
-    margin: 50px auto;     /* 50px отступ сверху/снизу, auto — центрирует по горизонтали */
+    width: 100%;
+    max-width: 900px;
+    margin: 50px auto;
     background-color: white;
     border-radius: 10px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
@@ -41,8 +56,14 @@ body {
     flex-direction: column;
 }
 
+.content-wrapper {
+    display: flex;
+    flex: 1;
+    min-height: 460px;
+}
+
 .form-side { flex: 1; padding: 40px; }
-.image-side { flex: 1; background-size: cover; background-position: center; }
+.image-side { flex: 1; background-size: cover; background-position: center; min-height: 300px; }
 
 /* Формы */
 h1 { color: #333; margin-bottom: 20px; }
@@ -50,3 +71,69 @@ h1 { color: #333; margin-bottom: 20px; }
 .form-group input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; }
 .btn { width: 100%; padding: 14px; border: none; border-radius: 4px; color: white; cursor: pointer; }
 .btn-primary { background-color: #4a6a4a; }
+
+/* ─── МОБИЛЬНАЯ АДАПТИВНОСТЬ ─── */
+@media (max-width: 768px) {
+
+    /* Шапка */
+    .site-header {
+        padding: 12px 16px;
+    }
+
+    /* Показываем гамбургер */
+    .hamburger-btn {
+        display: flex;
+    }
+
+    /* Мобильное меню — выпадающий список */
+    .site-nav {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: #fff;
+        border-top: 1px solid #eee;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        padding: 16px 20px 20px;
+        z-index: 999;
+    }
+
+    .site-nav.site-nav--open {
+        display: block;
+    }
+
+    /* Навигационные ссылки — вертикально */
+    .site-nav .nav-links {
+        flex-direction: column !important;
+        gap: 18px !important;
+        align-items: flex-start !important;
+    }
+
+    /* Скрываем разделитель «/» между Вход и Регистрация */
+    .slash-separator {
+        display: none;
+    }
+
+    /* Login / Register страницы */
+    .main-container {
+        margin: 0;
+        border-radius: 0;
+        box-shadow: none;
+        min-height: 100%;
+    }
+
+    .content-wrapper {
+        flex-direction: column;
+        min-height: unset;
+    }
+
+    /* Скрываем декоративную картинку на мобильном */
+    .image-side {
+        display: none;
+    }
+
+    .form-side {
+        padding: 28px 20px;
+    }
+}

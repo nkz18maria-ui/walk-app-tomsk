@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 interface MoodData {
   id: string;
@@ -27,8 +28,9 @@ const COLORS = {
 const MoodCard = ({
   data,
   isActive,
-  onSelect
-}: { data: MoodData; isActive: boolean; onSelect: () => void }) => {
+  onSelect,
+  compact,
+}: { data: MoodData; isActive: boolean; onSelect: () => void; compact: boolean }) => {
   const [isHovered, setIsHovered] = useState(false);
   return (
     <div
@@ -36,8 +38,7 @@ const MoodCard = ({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
-        flex: 1,
-        padding: '25px',
+        padding: compact ? '14px 10px' : '25px',
         borderRadius: '20px',
         cursor: 'pointer',
         textAlign: 'center',
@@ -49,27 +50,18 @@ const MoodCard = ({
         boxShadow: isActive || isHovered
           ? '0 10px 20px rgba(0,0,0,0.06)'
           : '0 5px 10px rgba(0,0,0,0.03)',
-        transform: (isHovered && !isActive) ? 'translateY(-5px)' : 'none',
+        transform: (isHovered && !isActive) ? 'translateY(-3px)' : 'none',
       }}
     >
-      <div style={{
-        marginBottom: '15px',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}>
+      <div style={{ marginBottom: compact ? '8px' : '15px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <img
           src={data.icon}
           alt={data.label}
-          style={{
-            width: '80px',
-            height: '80px',
-            objectFit: 'contain'
-          }}
+          style={{ width: compact ? '44px' : '80px', height: compact ? '44px' : '80px', objectFit: 'contain' }}
         />
       </div>
       <div style={{
-        fontSize: '14px',
+        fontSize: compact ? '12px' : '14px',
         fontWeight: isActive ? '600' : '400',
         color: isActive ? COLORS.accent : COLORS.textPassive,
       }}>
@@ -80,25 +72,17 @@ const MoodCard = ({
 };
 
 const MoodCards = ({ activeMoodId, onSelect }: MoodCardsProps) => {
+  const isMobile = useIsMobile();
+
   return (
-    <div style={{
-      maxWidth: '1000px',
-      margin: '0 auto',
-      fontFamily: "'Segoe UI', sans-serif",
-    }}>
-      <h3 style={{
-        color: '#4a6a4a',
-        marginBottom: '15px',
-        textAlign: 'left'
-      }}>
+    <div style={{ maxWidth: '1000px', margin: '0 auto', fontFamily: "'Segoe UI', sans-serif" }}>
+      <h3 style={{ color: '#4a6a4a', marginBottom: '15px', textAlign: 'left' }}>
         Ваше настроение
       </h3>
       <div style={{
-        display: 'flex',
-        flexDirection: 'row',
-        gap: '15px',
-        alignItems: 'stretch',
-        justifyContent: 'space-between',
+        display: 'grid',
+        gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(4, 1fr)',
+        gap: isMobile ? '10px' : '15px',
       }}>
         {moods.map((mood) => (
           <MoodCard
@@ -106,6 +90,7 @@ const MoodCards = ({ activeMoodId, onSelect }: MoodCardsProps) => {
             data={mood}
             isActive={activeMoodId === mood.id}
             onSelect={() => onSelect(mood.id)}
+            compact={isMobile}
           />
         ))}
       </div>
