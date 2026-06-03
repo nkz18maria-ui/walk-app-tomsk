@@ -35,6 +35,7 @@ const MapComponent = ({ points }: MapComponentProps) => {
   // Called from onBoundsChanged (event handler) — ref access here is allowed
   const recomputePixels = useCallback(
     (center: [number, number], zoom: number) => {
+      // eslint-disable-next-line react-hooks/refs
       const el = containerRef.current;
       if (!el) return;
       const { width, height } = el.getBoundingClientRect();

@@ -2,10 +2,12 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Map from '../components/Map';
 import type { MapPoint } from '../components/Map';
 import { Clock, Milestone, MapPin, ArrowLeft } from 'lucide-react';
+import { useIsMobile } from '../hooks/useIsMobile';
 
 const RoutePage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
   const routeData = location.state?.routeData;
 
   const points: MapPoint[] = routeData?.points?.map((p: any) => ({
@@ -16,15 +18,24 @@ const RoutePage = () => {
     mood: p.mood,
   })) ?? [];
 
-  return (
-    <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
-      {/* Карта на весь экран */}
-      <div style={{ width: '100%', height: '100%' }}>
-        <Map points={points} />
-      </div>
-
-      {/* Инфо-панель */}
-      <div style={{
+  const panelStyle: React.CSSProperties = isMobile
+    ? {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 1000,
+        backgroundColor: 'white',
+        borderRadius: '20px 20px 0 0',
+        boxShadow: '0 -4px 24px rgba(0,0,0,0.15)',
+        padding: '20px 16px 24px',
+        maxHeight: '48vh',
+        overflowY: 'auto',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '14px',
+      }
+    : {
         position: 'absolute',
         top: '20px',
         left: '20px',
@@ -39,7 +50,22 @@ const RoutePage = () => {
         display: 'flex',
         flexDirection: 'column',
         gap: '16px',
-      }}>
+      };
+
+  return (
+    <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ width: '100%', height: '100%' }}>
+        <Map points={points} />
+      </div>
+
+      <div style={panelStyle}>
+        {/* Drag handle на мобильном */}
+        {isMobile && (
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '4px' }}>
+            <div style={{ width: '40px', height: '4px', borderRadius: '2px', backgroundColor: '#ddd' }} />
+          </div>
+        )}
+
         {/* Кнопка назад */}
         <button
           onClick={() => navigate(-1)}
@@ -55,6 +81,7 @@ const RoutePage = () => {
             color: '#4a6a4a',
             fontWeight: '600',
             fontSize: '14px',
+            alignSelf: 'flex-start',
           }}
         >
           <ArrowLeft size={16} />
@@ -63,7 +90,6 @@ const RoutePage = () => {
 
         {routeData ? (
           <>
-            {/* Заголовок */}
             <div>
               <div style={{ fontSize: '11px', fontWeight: '700', color: '#7a927a', textTransform: 'uppercase', letterSpacing: '1.2px', marginBottom: '6px' }}>
                 Маршрут готов
@@ -73,7 +99,6 @@ const RoutePage = () => {
               </div>
             </div>
 
-            {/* Метрики */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <div style={metricCard}>
                 <Milestone size={16} color="#4a6a4a" />
@@ -91,7 +116,6 @@ const RoutePage = () => {
               </div>
             </div>
 
-            {/* Список точек */}
             {points.length > 0 && (
               <div>
                 <div style={{ fontSize: '11px', fontWeight: '700', color: '#7a927a', textTransform: 'uppercase', letterSpacing: '1.2px', marginBottom: '10px' }}>
@@ -112,7 +136,6 @@ const RoutePage = () => {
                       <MapPin size={14} color="#7a927a" style={{ flexShrink: 0 }} />
                     </div>
                   ))}
-                  {/* Замыкание круга */}
                   <div style={{ ...pointRow, opacity: 0.5 }}>
                     <div style={{ ...pointBadge, backgroundColor: '#e2ebe2', color: '#4a6a4a' }}>↩</div>
                     <div style={{ fontSize: '13px', color: '#7a927a', fontStyle: 'italic' }}>
