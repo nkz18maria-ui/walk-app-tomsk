@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Map, Marker } from 'pigeon-maps';
 
 export interface MapPoint {
@@ -26,37 +26,6 @@ interface MapComponentProps {
 const MapComponent = ({ points }: MapComponentProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Pixel coords stored in state — computed only inside event handlers, never during render
-  const [routePixels, setRoutePixels] = useState<[number, number][]>([]);
-  const [markerPixels, setMarkerPixels] = useState<[number, number][]>([]);
-
-  const hasRoute = points && points.length >= 2;
-
-  // Called from onBoundsChanged (event handler) — ref access here is allowed
-  const recomputePixels = useCallback(
-    (center: [number, number], zoom: number) => {
-      // eslint-disable-next-line react-hooks/refs
-      const el = containerRef.current;
-      if (!el) return;
-      const { width, height } = el.getBoundingClientRect();
-
-      const toPixel = (lat: number, lng: number): [number, number] => {
-        const [cx, cy] = toWorld(center[0], center[1], zoom);
-        const [px, py] = toWorld(lat, lng, zoom);
-        return [width / 2 + (px - cx), height / 2 + (py - cy)];
-      };
-
-      if (points && points.length >= 2) {
-        setRoutePixels([...points, points[0]].map(p => toPixel(p.latitude, p.longitude)));
-        setMarkerPixels(points.map(p => toPixel(p.latitude, p.longitude)));
-      } else {
-        setRoutePixels([]);
-        setMarkerPixels([]);
-      }
-    },
-    [points]
-  );
-
   const defaultCenter: [number, number] =
     points && points.length > 0
       ? [
@@ -65,12 +34,46 @@ const MapComponent = ({ points }: MapComponentProps) => {
         ]
       : TOMSK;
 
+  const [mapCenter, setMapCenter] = useState<[number, number]>(defaultCenter);
+  const [mapZoom, setMapZoom]     = useState(points && points.length > 0 ? 14 : 13);
+
+  const [routePixels,  setRoutePixels]  = useState<[number, number][]>([]);
+  const [markerPixels, setMarkerPixels] = useState<[number, number][]>([]);
+
+  // useEffect runs after paint — getBoundingClientRect() has real dimensions.
+  // Accessing ref.current inside useEffect is always allowed by react-hooks/refs.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || !points || points.length < 2) {
+      setRoutePixels([]);
+      setMarkerPixels([]);
+      return;
+    }
+
+    const { width, height } = el.getBoundingClientRect();
+    if (width === 0 || height === 0) return;
+
+    const toPixel = (lat: number, lng: number): [number, number] => {
+      const [cx, cy] = toWorld(mapCenter[0], mapCenter[1], mapZoom);
+      const [px, py] = toWorld(lat, lng, mapZoom);
+      return [width / 2 + (px - cx), height / 2 + (py - cy)];
+    };
+
+    setRoutePixels([...points, points[0]].map(p => toPixel(p.latitude, p.longitude)));
+    setMarkerPixels(points.map(p => toPixel(p.latitude, p.longitude)));
+  }, [points, mapCenter, mapZoom]);
+
+  const hasRoute = points && points.length >= 2;
+
   return (
     <div ref={containerRef} style={{ width: '100%', height: '100%', position: 'relative' }}>
       <Map
         defaultCenter={defaultCenter}
         defaultZoom={points && points.length > 0 ? 14 : 13}
-        onBoundsChanged={({ center, zoom }) => recomputePixels(center, zoom)}
+        onBoundsChanged={({ center, zoom }) => {
+          setMapCenter(center);
+          setMapZoom(zoom);
+        }}
       >
         {!hasRoute && <Marker anchor={TOMSK} color="#4a6a4a" />}
       </Map>
