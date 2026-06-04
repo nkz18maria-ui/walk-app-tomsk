@@ -55,7 +55,7 @@ const RoutePage = () => {
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
       <div style={{ width: '100%', height: '100%' }}>
-        <Map points={points} />
+        <Map points={points} geometry={routeData?.geometry ?? null} />
       </div>
 
       <div style={panelStyle}>

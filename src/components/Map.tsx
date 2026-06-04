@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { Map, Marker } from 'pigeon-maps';
+import polyline from '@mapbox/polyline';
 
 export interface MapPoint {
   id: number;
@@ -7,6 +8,11 @@ export interface MapPoint {
   latitude: number;
   longitude: number;
   mood?: string;
+}
+
+interface MapComponentProps {
+  points?: MapPoint[];
+  geometry?: string | null;
 }
 
 const TOMSK: [number, number] = [56.467, 84.948];
@@ -19,11 +25,7 @@ const toWorld = (lat: number, lng: number, zoom: number): [number, number] => {
   return [x, y];
 };
 
-interface MapComponentProps {
-  points?: MapPoint[];
-}
-
-const MapComponent = ({ points }: MapComponentProps) => {
+const MapComponent = ({ points, geometry }: MapComponentProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const defaultCenter: [number, number] =
@@ -40,15 +42,9 @@ const MapComponent = ({ points }: MapComponentProps) => {
   const [routePixels,  setRoutePixels]  = useState<[number, number][]>([]);
   const [markerPixels, setMarkerPixels] = useState<[number, number][]>([]);
 
-  // useEffect runs after paint — getBoundingClientRect() has real dimensions.
-  // Accessing ref.current inside useEffect is always allowed by react-hooks/refs.
   useEffect(() => {
     const el = containerRef.current;
-    if (!el || !points || points.length < 2) {
-      setRoutePixels([]);
-      setMarkerPixels([]);
-      return;
-    }
+    if (!el) return;
 
     const { width, height } = el.getBoundingClientRect();
     if (width === 0 || height === 0) return;
@@ -59,9 +55,23 @@ const MapComponent = ({ points }: MapComponentProps) => {
       return [width / 2 + (px - cx), height / 2 + (py - cy)];
     };
 
-    setRoutePixels([...points, points[0]].map(p => toPixel(p.latitude, p.longitude)));
-    setMarkerPixels(points.map(p => toPixel(p.latitude, p.longitude)));
-  }, [points, mapCenter, mapZoom]);
+    // Route line: real road geometry from ORS, or straight-line fallback
+    if (geometry) {
+      const decoded: [number, number][] = polyline.decode(geometry); // [[lat, lng], ...]
+      setRoutePixels(decoded.map(([lat, lng]) => toPixel(lat, lng)));
+    } else if (points && points.length >= 2) {
+      setRoutePixels([...points, points[0]].map(p => toPixel(p.latitude, p.longitude)));
+    } else {
+      setRoutePixels([]);
+    }
+
+    // Numbered markers always from points
+    if (points && points.length >= 2) {
+      setMarkerPixels(points.map(p => toPixel(p.latitude, p.longitude)));
+    } else {
+      setMarkerPixels([]);
+    }
+  }, [points, geometry, mapCenter, mapZoom]);
 
   const hasRoute = points && points.length >= 2;
 
@@ -78,7 +88,7 @@ const MapComponent = ({ points }: MapComponentProps) => {
         {!hasRoute && <Marker anchor={TOMSK} color="#4a6a4a" />}
       </Map>
 
-      {hasRoute && routePixels.length > 0 && (
+      {routePixels.length > 0 && (
         <svg
           style={{
             position: 'absolute',
@@ -94,18 +104,16 @@ const MapComponent = ({ points }: MapComponentProps) => {
             fill="none"
             stroke="#4a6a4a"
             strokeWidth={3}
-            strokeDasharray="10,6"
             strokeLinecap="round"
             strokeLinejoin="round"
             opacity={0.85}
           />
 
-          {points.map((point, index) => {
-            const pixel = markerPixels[index];
-            if (!pixel) return null;
+          {markerPixels.map((pixel, index) => {
+            if (!pixel || !points?.[index]) return null;
             const [x, y] = pixel;
             return (
-              <g key={point.id} transform={`translate(${x},${y})`}>
+              <g key={points[index].id} transform={`translate(${x},${y})`}>
                 <circle r={14} fill="#4a6a4a" stroke="white" strokeWidth={2.5} />
                 <text
                   textAnchor="middle"
