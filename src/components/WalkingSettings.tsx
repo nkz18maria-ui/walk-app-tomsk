@@ -41,13 +41,7 @@ export const WalkingSettings = ({ duration, setDuration, speed, setSpeed }: any)
             onChange={(e) => setDuration(parseInt(e.target.value))}
             style={{ width: '100%', accentColor: '#4a6a4a', cursor: 'pointer' }}
           />
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px', color: '#999', fontSize: '12px' }}>
-            <span>30 min</span>
-            <span>1h</span>
-            <span>2h</span>
-            <span>3h</span>
-            <span>4h</span>
-          </div>
+          
         </div>
       </div>
 
